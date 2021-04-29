@@ -1,12 +1,16 @@
-﻿using System;
+﻿/*
+ * This source code is under the Unlicense
+ */
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Morilib
 {
+    /// <summary>
+    /// Implementation of streams like Structure and Implementation of Computer Programs (SICP)
+    /// by C#.
+    /// </summary>
     public static class Infinitas
     {
         /// <summary>

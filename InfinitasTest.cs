@@ -1,3 +1,6 @@
+/*
+ * This source code is under the Unlicense
+ */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
