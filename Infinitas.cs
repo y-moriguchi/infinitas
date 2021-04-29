@@ -134,7 +134,7 @@ namespace Morilib
         /// <returns></returns>
         public static Stream<U> Select<T, U>(this Stream<T> stream, Func<T, U> func)
         {
-            return Cons(func(stream.Car), () => Select(stream.Cdr, func));
+            return stream == null ? null : Cons(func(stream.Car), () => Select(stream.Cdr, func));
         }
 
         /// <summary>
@@ -149,7 +149,8 @@ namespace Morilib
         /// <returns></returns>
         public static Stream<V> Select<T, U, V>(Stream<T> stream1, Stream<U> stream2, Func<T, U, V> func)
         {
-            return Cons(func(stream1.Car, stream2.Car), () => Select(stream1.Cdr, stream2.Cdr, func));
+            return stream1 == null || stream2 == null ? null :
+                Cons(func(stream1.Car, stream2.Car), () => Select(stream1.Cdr, stream2.Cdr, func));
         }
 
         /// <summary>
@@ -164,7 +165,12 @@ namespace Morilib
         {
             Stream<T> now = stream;
 
-            for(int i = 0; i < index; i++)
+            if(index < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            for (int i = 0; i < index; i++)
             {
                 if((now = now.Cdr) == null)
                 {
