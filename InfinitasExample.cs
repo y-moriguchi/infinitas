@@ -3,6 +3,7 @@
  */
 using System;
 using System.Linq;
+using System.Text;
 using static Morilib.Infinitas;
 
 namespace Morilib
@@ -127,6 +128,38 @@ namespace Morilib
             return y;
         }
 
+        /// <summary>
+        /// generates balanced parenthesis.
+        /// </summary>
+        /// <param name="inner">inner string</param>
+        /// <returns>balanced parenthesis</returns>
+        static Stream<string> Paren(string inner)
+        {
+            return Cons(inner, () => Paren("(" + inner + ")"));
+        }
+
+        static string RepeatString(string aString, int times)
+        {
+            StringBuilder builder = new StringBuilder();
+
+            for(int i = 0; i < times; i++)
+            {
+                builder.Append(aString);
+            }
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// generates Cantor set.
+        /// (string length as closed interval [0, 1])
+        /// </summary>
+        /// <param name="inner">inner string</param>
+        /// <returns>Cantor set</returns>
+        static Stream<string> CantorSet(string inner)
+        {
+            return Cons(inner, () => CantorSet(inner + RepeatString(" ", inner.Length) + inner));
+        }
+
         static void Main(string[] args)
         {
             // compute exp(1), sin(1) and cos(1) by the integrating series.
@@ -158,6 +191,21 @@ namespace Morilib
             Console.WriteLine("e by solving the differential equation dy/dt = y");
             Console.WriteLine("e = " + Solve(y => y, 1, 0.001).ElementAt(1000));
             Console.WriteLine();
+
+            // represent balanced parenthesis
+            Stream<string> paren = Paren("");
+            Console.WriteLine(paren.ElementAt(1));
+            Console.WriteLine(paren.ElementAt(2));
+            Console.WriteLine(paren.ElementAt(3));
+            Console.WriteLine();
+
+            // represent Cantor set
+            // (string length as closed interval [0, 1])
+            Stream<string> cantorSet = CantorSet("O");
+            Console.WriteLine(cantorSet.ElementAt(0));
+            Console.WriteLine(cantorSet.ElementAt(1));
+            Console.WriteLine(cantorSet.ElementAt(2));
+            Console.WriteLine(cantorSet.ElementAt(3));
 
             Console.WriteLine("hit Enter key");
             Console.ReadLine();
