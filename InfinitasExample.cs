@@ -138,51 +138,6 @@ namespace Morilib
             return Cons(inner, () => Paren("(" + inner + ")"));
         }
 
-        static string RepeatString(string aString, int times)
-        {
-            StringBuilder builder = new StringBuilder();
-
-            for(int i = 0; i < times; i++)
-            {
-                builder.Append(aString);
-            }
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// generates Cantor set.
-        /// (string length as closed interval [0, 1])
-        /// </summary>
-        /// <param name="inner">inner string</param>
-        /// <returns>Cantor set</returns>
-        static Stream<string> CantorSet(string inner)
-        {
-            return Cons(inner, () => CantorSet(inner + RepeatString(" ", inner.Length) + inner));
-        }
-
-        static string XorString(string inner)
-        {
-            StringBuilder builder = new StringBuilder();
-
-            for(int i = 0; i < inner.Length; i++)
-            {
-                builder.Append(inner[i] == '0' ? "1" : "0");
-            }
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// computes Thue-Morse sequence.
-        /// </summary>
-        /// <param name="prev">previous result</param>
-        /// <returns>Thue-Morse sequence</returns>
-        static Stream<string> ThueMorseSequence(string prev)
-        {
-            var car = prev + XorString(prev);
-
-            return Cons(car, () => ThueMorseSequence(car));
-        }
-
         static void Main(string[] args)
         {
             // compute exp(1), sin(1) and cos(1) by the integrating series.
@@ -220,24 +175,6 @@ namespace Morilib
             Console.WriteLine(paren.ElementAt(1));
             Console.WriteLine(paren.ElementAt(2));
             Console.WriteLine(paren.ElementAt(3));
-            Console.WriteLine();
-
-            // represent Cantor set
-            // (string length as closed interval [0, 1])
-            Stream<string> cantorSet = CantorSet("O");
-            Console.WriteLine(cantorSet.ElementAt(0));
-            Console.WriteLine(cantorSet.ElementAt(1));
-            Console.WriteLine(cantorSet.ElementAt(2));
-            Console.WriteLine(cantorSet.ElementAt(3));
-            Console.WriteLine();
-
-            // compute Thue-Morse sequence
-            Stream<string> thueMorse = Cons("0", () => ThueMorseSequence("0"));
-            Console.WriteLine(thueMorse.ElementAt(0));
-            Console.WriteLine(thueMorse.ElementAt(1));
-            Console.WriteLine(thueMorse.ElementAt(2));
-            Console.WriteLine(thueMorse.ElementAt(3));
-            Console.WriteLine(thueMorse.ElementAt(4));
             Console.WriteLine();
 
             Console.WriteLine("hit Enter key");
