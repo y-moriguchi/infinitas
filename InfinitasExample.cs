@@ -15,6 +15,31 @@ namespace Morilib
     static class InfinitasExample
     {
         /// <summary>
+        /// create a stream of integers from the given number.
+        /// </summary>
+        /// <param name="num">number</param>
+        /// <returns>stream of integers</returns>
+        static Stream<int> Integers(int num)
+        {
+            return Cons(num, () => Integers(num + 1));
+        }
+
+        /// <summary>
+        /// creates a stream using sieve of Eratosthenes.
+        /// </summary>
+        /// <param name="stream">stream</param>
+        /// <returns>sieved stream</returns>
+        static Stream<int> Sieve(Stream<int> stream)
+        {
+            return Cons(stream.Car, () => Sieve(stream.Cdr.Where(x => x % stream.Car != 0)));
+        }
+
+        /// <summary>
+        /// a stream of primes.
+        /// </summary>
+        static readonly Stream<int> Primes = Sieve(Integers(2));
+
+        /// <summary>
         /// adds element of two stream.
         /// </summary>
         /// <param name="s1">stream1</param>
@@ -140,6 +165,10 @@ namespace Morilib
 
         static void Main(string[] args)
         {
+            // compute 132nd prime number
+            Console.WriteLine("132nd prime number is " + Primes.ElementAt(131));
+            Console.WriteLine();
+
             // compute exp(1), sin(1) and cos(1) by the integrating series.
             Stream<double> exp = null;
             Stream<double> cos = null;
