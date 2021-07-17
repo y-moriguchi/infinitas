@@ -23,7 +23,7 @@ namespace Morilib
         [TestMethod]
         public void StreamToStreamTest()
         {
-            var res = 765.ToStream();
+            var res = ToStream(765);
 
             Assert.AreEqual(765, res.Car);
             Assert.IsNull(res.Cdr);
@@ -32,7 +32,7 @@ namespace Morilib
         [TestMethod]
         public void StreamWhereTest1()
         {
-            var st2 = Enumerable.Range(1, 5).ToStream();
+            var st2 = Enumerable.Range(1, 5).AsStream();
             var res2 = st2.Where(x => x % 2 == 0);
             Assert.AreEqual(2, res2.Car);
             Assert.AreEqual(4, res2.Cdr.Car);
@@ -58,7 +58,7 @@ namespace Morilib
         [TestMethod]
         public void StreamSelectTest1()
         {
-            var st1 = Enumerable.Range(1, 3).ToStream();
+            var st1 = Enumerable.Range(1, 3).AsStream();
             var res1 = st1.Select(x => "0" + x);
             Assert.AreEqual("01", res1.Car);
             Assert.AreEqual("02", res1.Cdr.Car);
@@ -79,8 +79,8 @@ namespace Morilib
         [TestMethod]
         public void StreamSelectTest3()
         {
-            var st1 = Enumerable.Range(1, 3).ToStream();
-            var st2 = Enumerable.Range(3, 5).ToStream();
+            var st1 = Enumerable.Range(1, 3).AsStream();
+            var st2 = Enumerable.Range(3, 5).AsStream();
             var res1 = Select(st1, st2, (x, y) => "0" + (x + y));
             Assert.AreEqual("04", res1.Car);
             Assert.AreEqual("06", res1.Cdr.Car);
@@ -102,7 +102,7 @@ namespace Morilib
         [TestMethod]
         public void StreamElementAtTest1()
         {
-            var st1 = Enumerable.Range(2, 3).ToStream();
+            var st1 = Enumerable.Range(2, 3).AsStream();
             Assert.AreEqual(2, st1.ElementAt(0));
             Assert.AreEqual(3, st1.ElementAt(1));
             Assert.AreEqual(4, st1.ElementAt(2));
@@ -123,8 +123,8 @@ namespace Morilib
         [TestMethod]
         public void StreamInterleaveTest()
         {
-            var st1 = Enumerable.Range(10, 2).ToStream();
-            var st2 = Enumerable.Range(20, 4).ToStream();
+            var st1 = Enumerable.Range(10, 2).AsStream();
+            var st2 = Enumerable.Range(20, 4).AsStream();
             var res1 = st1.Interleave(st2);
             Assert.AreEqual(10, res1.ElementAt(0));
             Assert.AreEqual(20, res1.ElementAt(1));
@@ -139,17 +139,35 @@ namespace Morilib
         public void StreamToEnumerableTest()
         {
             var st1 = Integers(1);
-            Assert.AreEqual(55, st1.ToEnumerable().Take(10).Sum());
+            Assert.AreEqual(55, st1.AsEnumerable().Take(10).Sum());
         }
 
         [TestMethod]
         public void IEnumerableToStreamTest()
         {
-            var res1 = Enumerable.Range(1, 3).ToStream();
+            var res1 = Enumerable.Range(1, 3).AsStream();
             Assert.AreEqual(1, res1.Car);
             Assert.AreEqual(2, res1.Cdr.Car);
             Assert.AreEqual(3, res1.Cdr.Cdr.Car);
             Assert.IsNull(res1.Cdr.Cdr.Cdr);
+        }
+
+        [TestMethod]
+        public void IterateTest()
+        {
+            Stream<double> goldenStream = Iterate(x => 1.0 + 1 / x, 1.0);
+            Assert.IsTrue(Math.Abs(goldenStream.ElementAt(100) - 1.618) < 0.001);
+        }
+
+        [TestMethod]
+        public void ConstantTest()
+        {
+            var stream = Constant(27);
+            Assert.AreEqual(27, stream.Car);
+            Assert.AreEqual(27, stream.Cdr.Car);
+            Assert.AreEqual(27, stream.Cdr.Cdr.Car);
+            Assert.AreEqual(27, stream.Cdr.Cdr.Cdr.Car);
+            Assert.AreEqual(27, stream.Cdr.Cdr.Cdr.Cdr.Car);
         }
     }
 }

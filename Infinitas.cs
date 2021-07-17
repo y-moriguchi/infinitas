@@ -97,7 +97,7 @@ namespace Morilib
         /// <typeparam name="T">type</typeparam>
         /// <param name="value">value</param>
         /// <returns></returns>
-        public static Stream<T> ToStream<T>(this T value)
+        public static Stream<T> ToStream<T>(T value)
         {
             return Cons(value, () => null);
         }
@@ -196,77 +196,23 @@ namespace Morilib
             return s1 == null ? s2 : Cons(s1.Car, () => s2.Interleave(s1.Cdr));
         }
 
-        internal class StreamEnumerator<T> : IEnumerator<T>
-        {
-            internal StreamEnumerator(Stream<T> stream)
-            {
-                this.stream = stream;
-            }
-
-            private bool read = false;
-            private Stream<T> stream;
-
-            public T Current => read ? stream.Car : default(T);
-
-            object IEnumerator.Current => Current;
-
-            public void Dispose()
-            {
-            }
-
-            public bool MoveNext()
-            {
-                if(read)
-                {
-                    stream = stream.Cdr;
-                }
-                else
-                {
-                    read = true;
-                }
-                return stream != null;
-            }
-
-            public void Reset()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        internal class StreamEnumerable<T> : IEnumerable<T>
-        {
-            private readonly Stream<T> stream;
-
-            internal StreamEnumerable(Stream<T> stream)
-            {
-                this.stream = stream;
-            }
-
-            public IEnumerator<T> GetEnumerator()
-            {
-                return new StreamEnumerator<T>(stream);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-        }
-
         /// <summary>
         /// converts the stream to IEnumerable.
         /// </summary>
         /// <typeparam name="T">type</typeparam>
         /// <param name="stream">stream to convert</param>
         /// <returns>converted IEnumerable</returns>
-        public static IEnumerable<T> ToEnumerable<T>(this Stream<T> stream)
+        public static IEnumerable<T> AsEnumerable<T>(this Stream<T> stream)
         {
-            return new StreamEnumerable<T>(stream);
+            for(var pointer = stream; pointer != null; pointer = pointer.Cdr)
+            {
+                yield return pointer.Car;
+            }
         }
 
-        private static Stream<T> ToStream<T>(IEnumerator<T> enumerator)
+        private static Stream<T> AsStream<T>(IEnumerator<T> enumerator)
         {
-            return enumerator.MoveNext() ? Cons(enumerator.Current, () => ToStream(enumerator)) : null;
+            return enumerator.MoveNext() ? Cons(enumerator.Current, () => AsStream(enumerator)) : null;
         }
 
         /// <summary>
@@ -275,9 +221,35 @@ namespace Morilib
         /// <typeparam name="T">type</typeparam>
         /// <param name="enumerable">IEnumerable to convert</param>
         /// <returns>converted stream</returns>
-        public static Stream<T> ToStream<T>(this IEnumerable<T> enumerable)
+        public static Stream<T> AsStream<T>(this IEnumerable<T> enumerable)
         {
-            return ToStream(enumerable.GetEnumerator());
+            return AsStream(enumerable.GetEnumerator());
+        }
+
+        /// <summary>
+        /// returns stream whose first value is the baseValue and rest value is Iterate(func, func(baseValue)).
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="func">function</param>
+        /// <param name="baseValue">base value</param>
+        /// <returns>new stream</returns>
+        public static Stream<T> Iterate<T>(Func<T, T> func, T baseValue)
+        {
+            return Cons(baseValue, () => Iterate(func, func(baseValue)));
+        }
+
+        /// <summary>
+        /// returns infinite stream whose value is constant.
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="value">constant</param>
+        /// <returns>constant value</returns>
+        public static Stream<T> Constant<T>(T value)
+        {
+            Stream<T> stream = null;
+
+            stream = Cons(value, () => stream);
+            return stream;
         }
     }
 }

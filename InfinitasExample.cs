@@ -177,10 +177,10 @@ namespace Morilib
             cos = Cons(1, () => IntegrateSeries(sin).Select(x => -x));
             sin = Cons(0, () => IntegrateSeries(cos));
             Console.WriteLine("exp(1), sin(1) and cos(1) by the integrating series");
-            Console.WriteLine("e               = " + exp.ToEnumerable().Take(100).Sum());
-            Console.WriteLine("sin(1)          = " + sin.ToEnumerable().Take(100).Sum());
+            Console.WriteLine("e               = " + exp.AsEnumerable().Take(100).Sum());
+            Console.WriteLine("sin(1)          = " + sin.AsEnumerable().Take(100).Sum());
             Console.WriteLine("sin(1) (actual) = " + Math.Sin(1));
-            Console.WriteLine("cos(1)          = " + cos.ToEnumerable().Take(100).Sum());
+            Console.WriteLine("cos(1)          = " + cos.AsEnumerable().Take(100).Sum());
             Console.WriteLine("cos(1) (actual) = " + Math.Cos(1));
             Console.WriteLine();
 
@@ -205,6 +205,10 @@ namespace Morilib
             Console.WriteLine(paren.ElementAt(2));
             Console.WriteLine(paren.ElementAt(3));
             Console.WriteLine();
+
+            // compute golden ratio
+            Stream<double> goldenStream = Iterate(x => 1.0 + 1 / x, 1.0);
+            Console.WriteLine(goldenStream.ElementAt(100));
 
             Console.WriteLine("hit Enter key");
             Console.ReadLine();
