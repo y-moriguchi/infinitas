@@ -158,6 +158,84 @@ namespace Morilib
         }
 
         /// <summary>
+        /// A bind function of stream.
+        /// </summary>
+        /// <typeparam name="T">input type</typeparam>
+        /// <typeparam name="U">output type</typeparam>
+        /// <param name="id">stream</param>
+        /// <param name="k">function to bind</param>
+        /// <returns>bound stream</returns>
+        public static Stream<U> SelectMany<T, U>(this Stream<T> stream, Func<T, Stream<U>> f)
+        {
+            if(stream == null)
+            {
+                return null;
+            }
+            else
+            {
+                return f(stream.Car).Concat(SelectMany(stream.Cdr, f));
+            }
+        }
+
+        /// <summary>
+        /// A bind function of stream.
+        /// This form is for LINQ query syntax.
+        /// </summary>
+        /// <typeparam name="T">input type</typeparam>
+        /// <typeparam name="U">output type</typeparam>
+        /// <typeparam name="V">mapped type</typeparam>
+        /// <param name="m">stream</param>
+        /// <param name="k">function to bind</param>
+        /// <param name="s">map function</param>
+        /// <returns>bound stream</returns>
+        public static Stream<V> SelectMany<T, U, V>(this Stream<T> m, Func<T, Stream<U>> k, Func<T, U, V> s)
+        {
+            return m.SelectMany(t => k(t).SelectMany(u => ToStream(s(t, u))));
+        }
+
+        /// <summary>
+        /// concatenates two streams.
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="stream1">stream</param>
+        /// <param name="stream2">another stream</param>
+        /// <returns>concatenated stream</returns>
+        public static Stream<T> Concat<T>(this Stream<T> stream1, Stream<T> stream2)
+        {
+            if(stream1 == null)
+            {
+                return stream2;
+            }
+            else
+            {
+                return Cons(stream1.Car, () => Concat(stream1.Cdr, stream2));
+            }
+        }
+
+        /// <summary>
+        /// creates new stream whose element is result of applied
+        /// the given function to corresponding element of the given streams.
+        /// </summary>
+        /// <typeparam name="T">type of stream1</typeparam>
+        /// <typeparam name="U">type of stream2</typeparam>
+        /// <typeparam name="V">type of result</typeparam>
+        /// <param name="stream1">stream</param>
+        /// <param name="stream2">another stream</param>
+        /// <param name="f">function</param>
+        /// <returns>stream</returns>
+        public static Stream<V> Zip<T, U, V>(this Stream<T> stream1, Stream<U> stream2, Func<T, U, V> f)
+        {
+            if (stream1 == null || stream2 == null)
+            {
+                return null;
+            }
+            else
+            {
+                return Cons(f(stream1.Car, stream2.Car), () => Zip(stream1.Cdr, stream2.Cdr, f));
+            }
+        }
+
+        /// <summary>
         /// gets an element value by the index.
         /// The index is started from 0.
         /// </summary>

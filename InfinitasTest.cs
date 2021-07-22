@@ -169,5 +169,49 @@ namespace Morilib
             Assert.AreEqual(27, stream.Cdr.Cdr.Cdr.Car);
             Assert.AreEqual(27, stream.Cdr.Cdr.Cdr.Cdr.Car);
         }
+
+        [TestMethod]
+        public void SelectManyTest()
+        {
+            var res1 = from a in Enumerable.Range(1, 3).AsStream()
+                       from b in Enumerable.Range(2, 2).AsStream()
+                       select a + b;
+            Assert.AreEqual(3, res1.ElementAt(0));
+            Assert.AreEqual(4, res1.ElementAt(1));
+            Assert.AreEqual(4, res1.ElementAt(2));
+            Assert.AreEqual(5, res1.ElementAt(3));
+            Assert.AreEqual(5, res1.ElementAt(4));
+            Assert.AreEqual(6, res1.ElementAt(5));
+            Assert.AreEqual(6, res1.AsEnumerable().Count());
+        }
+
+        [TestMethod]
+        public void ConcatTest()
+        {
+            var res1 = Enumerable.Range(1, 3).AsStream().Concat(Enumerable.Range(4, 2).AsStream());
+            Assert.AreEqual(1, res1.ElementAt(0));
+            Assert.AreEqual(2, res1.ElementAt(1));
+            Assert.AreEqual(3, res1.ElementAt(2));
+            Assert.AreEqual(4, res1.ElementAt(3));
+            Assert.AreEqual(5, res1.ElementAt(4));
+            Assert.AreEqual(5, res1.AsEnumerable().Count());
+        }
+
+        [TestMethod]
+        public void ZipTest()
+        {
+            var s1 = Enumerable.Range(1, 4).AsStream();
+            var s2 = Enumerable.Range(2, 3).AsStream();
+            var res1 = s1.Zip(s2, (x, y) => x + y);
+            var res2 = s2.Zip(s1, (x, y) => x + y);
+            Assert.AreEqual(3, res1.ElementAt(0));
+            Assert.AreEqual(5, res1.ElementAt(1));
+            Assert.AreEqual(7, res1.ElementAt(2));
+            Assert.AreEqual(3, res1.AsEnumerable().Count());
+            Assert.AreEqual(3, res2.ElementAt(0));
+            Assert.AreEqual(5, res2.ElementAt(1));
+            Assert.AreEqual(7, res2.ElementAt(2));
+            Assert.AreEqual(3, res2.AsEnumerable().Count());
+        }
     }
 }
