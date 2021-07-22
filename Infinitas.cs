@@ -2,7 +2,6 @@
  * This source code is under the Unlicense
  */
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Morilib
@@ -167,14 +166,7 @@ namespace Morilib
         /// <returns>bound stream</returns>
         public static Stream<U> SelectMany<T, U>(this Stream<T> stream, Func<T, Stream<U>> f)
         {
-            if(stream == null)
-            {
-                return null;
-            }
-            else
-            {
-                return f(stream.Car).Concat(SelectMany(stream.Cdr, f));
-            }
+            return stream == null ? null : f(stream.Car).Concat(SelectMany(stream.Cdr, f));
         }
 
         /// <summary>
@@ -202,14 +194,7 @@ namespace Morilib
         /// <returns>concatenated stream</returns>
         public static Stream<T> Concat<T>(this Stream<T> stream1, Stream<T> stream2)
         {
-            if(stream1 == null)
-            {
-                return stream2;
-            }
-            else
-            {
-                return Cons(stream1.Car, () => Concat(stream1.Cdr, stream2));
-            }
+            return stream1 == null ? stream2 : Cons(stream1.Car, () => Concat(stream1.Cdr, stream2));
         }
 
         /// <summary>
@@ -288,22 +273,6 @@ namespace Morilib
             }
         }
 
-        private static Stream<T> AsStream<T>(IEnumerator<T> enumerator)
-        {
-            return enumerator.MoveNext() ? Cons(enumerator.Current, () => AsStream(enumerator)) : null;
-        }
-
-        /// <summary>
-        /// converts the IEnumertable to stream.
-        /// </summary>
-        /// <typeparam name="T">type</typeparam>
-        /// <param name="enumerable">IEnumerable to convert</param>
-        /// <returns>converted stream</returns>
-        public static Stream<T> AsStream<T>(this IEnumerable<T> enumerable)
-        {
-            return AsStream(enumerable.GetEnumerator());
-        }
-
         /// <summary>
         /// returns stream whose first value is the baseValue and rest value is Iterate(func, func(baseValue)).
         /// </summary>
@@ -317,17 +286,40 @@ namespace Morilib
         }
 
         /// <summary>
+        /// generates stream of int.
+        /// </summary>
+        /// <param name="start">start number</param>
+        /// <param name="count">count</param>
+        /// <returns>stream</returns>
+        public static Stream<int> Range(int start, int count)
+        {
+            return count > 0 ? Cons(start, () => Range(start + 1, count - 1)) : null;
+        }
+
+        /// <summary>
         /// returns infinite stream whose value is constant.
         /// </summary>
         /// <typeparam name="T">type</typeparam>
         /// <param name="value">constant</param>
         /// <returns>constant value</returns>
-        public static Stream<T> Constant<T>(T value)
+        public static Stream<T> Repeat<T>(T value)
         {
             Stream<T> stream = null;
 
             stream = Cons(value, () => stream);
             return stream;
+        }
+
+        /// <summary>
+        /// generates stream which repeats the given value during the given count.
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="value">value to repeat</param>
+        /// <param name="count">count</param>
+        /// <returns>stream</returns>
+        public static Stream<T> Repeat<T>(T value, int count)
+        {
+            return count > 0 ? Cons(value, () => Repeat(value, count - 1)) : null;
         }
     }
 }
