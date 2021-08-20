@@ -337,18 +337,6 @@ namespace Morilib
         }
 
         /// <summary>
-        /// generates stream which repeats the given value during the given count.
-        /// </summary>
-        /// <typeparam name="T">type</typeparam>
-        /// <param name="value">value to repeat</param>
-        /// <param name="count">count</param>
-        /// <returns>stream</returns>
-        public static Stream<T> Repeat<T>(T value, int count)
-        {
-            return count > 0 ? Cons(value, () => Repeat(value, count - 1)) : null;
-        }
-
-        /// <summary>
         /// flat stream of stream.
         /// </summary>
         /// <typeparam name="T">type</typeparam>

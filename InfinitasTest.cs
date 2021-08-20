@@ -167,17 +167,11 @@ namespace Morilib
         public void RepeatTest()
         {
             var stream1 = Repeat(27);
-            var stream2 = Repeat(27, 4);
             Assert.AreEqual(27, stream1.Car);
             Assert.AreEqual(27, stream1.Cdr.Car);
             Assert.AreEqual(27, stream1.Cdr.Cdr.Car);
             Assert.AreEqual(27, stream1.Cdr.Cdr.Cdr.Car);
             Assert.AreEqual(27, stream1.Cdr.Cdr.Cdr.Cdr.Car);
-            Assert.AreEqual(27, stream2.Car);
-            Assert.AreEqual(27, stream2.Cdr.Car);
-            Assert.AreEqual(27, stream2.Cdr.Cdr.Car);
-            Assert.AreEqual(27, stream2.Cdr.Cdr.Cdr.Car);
-            Assert.IsNull(stream2.Cdr.Cdr.Cdr.Cdr);
         }
 
         [TestMethod]
