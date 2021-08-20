@@ -13,7 +13,7 @@ Features of Infinitas are shown as follows.
 Delay and Force are delaying evaluation of thunk and getting the value from delayed object, respectively.  
 Forced value is memoized.
 
-```
+```csharp
 var delayed = Delay(() => 765);
 delayed.Force();   // 765
 ```
@@ -21,7 +21,7 @@ delayed.Force();   // 765
 ### Cons
 Cons creates a delayed list whose values are first value and thunk of rest values.
 
-```
+```csharp
 // creates a stream of integers
 static Stream<int> Integers(int n)
 {
@@ -33,7 +33,7 @@ static Stream<int> Integers(int n)
 Car and Cdr property are getting the first value and the rest values, respectivelly.  
 If the stream is finite and has no more values, Cdr will be null.
 
-```
+```csharp
 var integers = Integers(1);
 integers.Car;  // 1
 integers.Cdr;  // Integers(2)
@@ -42,14 +42,14 @@ integers.Cdr;  // Integers(2)
 ### ToStream
 ToStream creates a singleton stream which consists of the given value.
 
-```
-var stream = 765.ToStream();  // a stream which contains only 765
+```csharp
+var stream = ToStream(765);  // a stream which contains only 765
 ```
 
 ### Where
 Where filters the stream by predicate function.
 
-```
+```csharp
 var stream = Integers(1).Where(x => x % 2 == 0);  // stream of even integers
 ```
 
@@ -57,7 +57,7 @@ var stream = Integers(1).Where(x => x % 2 == 0);  // stream of even integers
 Select maps the stream by the given function.  
 Select method is overridden using two streams.
 
-```
+```csharp
 var stream = Integers(1).Select(x => x * x);  // stream of squared integers
 ```
 
@@ -66,14 +66,14 @@ ElementAt gets the value indexed by the given index.
 Index is start from 0.
 If index is out of range, this throws ArgumentOutOfRangeException.
 
-```
+```csharp
 var value = Integers(1).ElementAt(3);  // 4
 ```
 
 ### Interleave
 Interleave creates the stream whose value is gotten from two streams alternatively.
 
-```
+```csharp
 var stream1 = Enumerable.Range(10, 2).ToStream();
 var stream2 = Enumerable.Range(20, 4).ToStream();
 var stream3 = stream1.Interleave(stream2);
@@ -85,24 +85,93 @@ stream3.ElementAt(4);   // 22
 stream3.ElementAt(5);   // 23
 ```
 
-### ToStream
-ToStream converts IEnumerable to Stream.
+### AsStream
+AsStream converts IEnumerable to Stream.
 
-```
-var stream = Enumerable.Range(1, 3).ToStream();  // stream of 1, 2, 3
+```csharp
+var stream = Enumerable.Range(1, 3).AsStream();  // stream of 1, 2, 3
 ```
 
-### ToEnumerator
-ToEnumerator converts Stream to IEnumerable.
+### AsEnumerator
+AsEnumerator converts Stream to IEnumerable.
 
+```csharp
+var enumerator = Integers(1).AsEnumerable();  // infinite IEnumerable of integers
 ```
-var enumerator = Integers(1).ToEnumerable();  // infinite IEnumerable of integers
+
+### Concat
+Concat concatenates two streams.
+
+```csharp
+var stream = Range(1, 3).Concat(Range(4, 2));  // stream of 1, 2, 3, 4, 5
+```
+
+### Zip
+Zip creates new stream whose element is result of applied the given function
+to corresponding element of the given streams.
+
+```csharp
+var s1 = Range(1, 4);
+var s2 = Range(2, 3);
+var stream1 = s1.Zip(s2, (x, y) => x + y);  // stream of 3, 5, 7
+```
+
+### Iterate
+Iterate returns stream whose first value is the baseValue and rest value is Iterate(func, func(baseValue)).  
+Below example computes golden ratio.
+
+```csharp
+Stream<double> goldenStream = Iterate(x => 1.0 + 1 / x, 1.0);
+goldenStream.ElementAt(100);   // about 1.618
+```
+
+### Range
+Range generates stream of int.
+
+```csharp
+var stream = Range(1, 3);   // stream of 1, 2, 3
+```
+
+### Repeat
+Repeat returns infinite stream whose value is constant.
+
+```csharp
+var stream = Repeat(1);  // stream of 1, 1, 1, ...
+```
+
+### Flat
+Flat flats stream of stream.
+
+```csharp
+var streams = new Stream<int>[3];
+streams[0] = Range(1, 3);             // stream if 1, 2, 3
+streams[1] = new int[0].AsStream();   // empty stream
+streams[2] = Range(1, 2);             // stream of 1, 2
+Stream<int> stream = streams.AsStream().Flat();  // stream of 1, 2, 3, 1, 2
+```
+
+### Skip
+Skip skips given elements.
+If null is reached while skipping, returns null.
+
+```csharp
+var stream1 = Range(1, 5);
+var stream = stream1.Skip(3);   // stream of 4, 5
+```
+
+### SkipWhile
+SkipWhile skips elements while result that element applied to given predicate is true.
+If null is reached while skipping, returns null.
+
+```csharp
+var stream11 = Range(1, 5);
+var stream 0 stream1.SkipWhile(x => x <= 3);  // stream of 4, 5
 ```
 
 ## Example
 Computing exp(1), sin(1), cos(1) by integrating series represented by stream.
 
-```
+```csharp
     static class Example
     {
         static Stream<double> IntegrateSeries(double count, Stream<double> series)
