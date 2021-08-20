@@ -165,7 +165,7 @@ If null is reached while skipping, returns null.
 
 ```csharp
 var stream11 = Range(1, 5);
-var stream 0 stream1.SkipWhile(x => x <= 3);  // stream of 4, 5
+var stream = stream1.SkipWhile(x => x <= 3);  // stream of 4, 5
 ```
 
 ## Example
