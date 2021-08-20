@@ -110,6 +110,7 @@ namespace Morilib
         /// <returns></returns>
         public static Stream<T> Cons<T>(T car, Func<Stream<T>> cdr)
         {
+            if (cdr == null) { throw new ArgumentNullException(nameof(cdr)); }
             return new Stream<T>(car, cdr);
         }
 
@@ -122,6 +123,7 @@ namespace Morilib
         /// <returns>filtered stream</returns>
         public static Stream<T> Where<T>(this Stream<T> stream, Func<T, bool> pred)
         {
+            if (pred == null) { throw new ArgumentNullException(nameof(pred)); }
             for (var now = stream; stream != null && !pred(stream.Car); stream = stream.Cdr) { }
 
             return stream == null ? null : Cons(stream.Car, () => Where(stream.Cdr, pred));
@@ -137,6 +139,7 @@ namespace Morilib
         /// <returns></returns>
         public static Stream<U> Select<T, U>(this Stream<T> stream, Func<T, U> func)
         {
+            if (func == null) { throw new ArgumentNullException(nameof(func)); }
             return stream == null ? null : Cons(func(stream.Car), () => Select(stream.Cdr, func));
         }
 
@@ -152,6 +155,7 @@ namespace Morilib
         /// <returns></returns>
         public static Stream<V> Select<T, U, V>(Stream<T> stream1, Stream<U> stream2, Func<T, U, V> func)
         {
+            if (func == null) { throw new ArgumentNullException(nameof(func)); }
             return stream1 == null || stream2 == null ? null :
                 Cons(func(stream1.Car, stream2.Car), () => Select(stream1.Cdr, stream2.Cdr, func));
         }
@@ -166,6 +170,7 @@ namespace Morilib
         /// <returns>bound stream</returns>
         public static Stream<U> SelectMany<T, U>(this Stream<T> stream, Func<T, Stream<U>> f)
         {
+            if (f == null) { throw new ArgumentNullException(nameof(f)); }
             return stream == null ? null : f(stream.Car).Concat(SelectMany(stream.Cdr, f));
         }
 
@@ -182,6 +187,8 @@ namespace Morilib
         /// <returns>bound stream</returns>
         public static Stream<V> SelectMany<T, U, V>(this Stream<T> m, Func<T, Stream<U>> k, Func<T, U, V> s)
         {
+            if (k == null) { throw new ArgumentNullException(nameof(k)); }
+            if (s == null) { throw new ArgumentNullException(nameof(s)); }
             return m.SelectMany(t => k(t).SelectMany(u => ToStream(s(t, u))));
         }
 
@@ -210,6 +217,7 @@ namespace Morilib
         /// <returns>stream</returns>
         public static Stream<V> Zip<T, U, V>(this Stream<T> stream1, Stream<U> stream2, Func<T, U, V> f)
         {
+            if (f == null) { throw new ArgumentNullException(nameof(f)); }
             if (stream1 == null || stream2 == null)
             {
                 return null;
@@ -273,6 +281,23 @@ namespace Morilib
             }
         }
 
+        private static Stream<T> AsStreamAux<T>(IEnumerator<T> enumerator)
+        {
+            return enumerator.MoveNext() ? Cons(enumerator.Current, () => AsStreamAux(enumerator)) : null;
+        }
+
+        /// <summary>
+        /// converts the IEnumertable to stream.
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="enumerable">IEnumerable to convert</param>
+        /// <returns>converted stream</returns>
+        public static Stream<T> AsStream<T>(this IEnumerable<T> enumerable)
+        {
+            if (enumerable == null) { throw new ArgumentNullException(nameof(enumerable)); }
+            return AsStreamAux(enumerable.GetEnumerator());
+        }
+
         /// <summary>
         /// returns stream whose first value is the baseValue and rest value is Iterate(func, func(baseValue)).
         /// </summary>
@@ -282,6 +307,7 @@ namespace Morilib
         /// <returns>new stream</returns>
         public static Stream<T> Iterate<T>(Func<T, T> func, T baseValue)
         {
+            if (func == null) { throw new ArgumentNullException(nameof(func)); }
             return Cons(baseValue, () => Iterate(func, func(baseValue)));
         }
 
@@ -320,6 +346,61 @@ namespace Morilib
         public static Stream<T> Repeat<T>(T value, int count)
         {
             return count > 0 ? Cons(value, () => Repeat(value, count - 1)) : null;
+        }
+
+        /// <summary>
+        /// flat stream of stream.
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="stream">stream of stream</param>
+        /// <returns>flatten stream</returns>
+        public static Stream<T> Flat<T>(this Stream<Stream<T>> stream)
+        {
+            if(stream == null)
+            {
+                return null;
+            }
+            else if(stream.Car == null)
+            {
+                return Flat(stream.Cdr);
+            }
+            else
+            {
+                return Cons(stream.Car.Car, () => Flat(Cons(stream.Car.Cdr, () => stream.Cdr)));
+            }
+        }
+
+        /// <summary>
+        /// skips given elements.
+        /// If null is reached while skipping, returns null.
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="stream">stream</param>
+        /// <param name="skip">skip elements</param>
+        /// <returns></returns>
+        public static Stream<T> Skip<T>(this Stream<T> stream, int skip)
+        {
+            var ptr = stream;
+
+            for (int i = 0; ptr != null && i < skip; i++, ptr = ptr.Cdr) { }
+            return ptr;
+        }
+
+        /// <summary>
+        /// skips elements while result that element applied to given predicate is true.
+        /// If null is reached while skipping, returns null.
+        /// </summary>
+        /// <typeparam name="T">type</typeparam>
+        /// <param name="stream">stream</param>
+        /// <param name="skip">skip elements</param>
+        /// <returns></returns>
+        public static Stream<T> SkipWhile<T>(this Stream<T> stream, Func<T, bool> pred)
+        {
+            var ptr = stream;
+
+            if (pred == null) { throw new ArgumentNullException(nameof(pred)); }
+            for (; ptr != null && pred(ptr.Car); ptr = ptr.Cdr) { }
+            return ptr;
         }
     }
 }

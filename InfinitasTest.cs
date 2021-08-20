@@ -143,6 +143,20 @@ namespace Morilib
         }
 
         [TestMethod]
+        public void IEnumerableToStreamTest()
+        {
+            var res1 = Enumerable.Range(1, 3).AsStream();
+            Assert.AreEqual(1, res1.Car);
+            Assert.AreEqual(2, res1.Cdr.Car);
+            Assert.AreEqual(3, res1.Cdr.Cdr.Car);
+            Assert.IsNull(res1.Cdr.Cdr.Cdr);
+            Assert.AreEqual(1, res1.Car);
+            Assert.AreEqual(2, res1.Cdr.Car);
+            Assert.AreEqual(3, res1.Cdr.Cdr.Car);
+            Assert.IsNull(res1.Cdr.Cdr.Cdr);
+        }
+
+        [TestMethod]
         public void IterateTest()
         {
             Stream<double> goldenStream = Iterate(x => 1.0 + 1 / x, 1.0);
@@ -218,6 +232,53 @@ namespace Morilib
             Assert.AreEqual(3, res1.ElementAt(1));
             Assert.AreEqual(4, res1.ElementAt(2));
             Assert.AreEqual(3, res1.AsEnumerable().Count());
+        }
+
+        [TestMethod]
+        public void FlatTest()
+        {
+            var streams = new Stream<int>[3];
+            Stream<int> res1;
+            streams[0] = Range(1, 3);
+            streams[1] = new int[0].AsStream();
+            streams[2] = Range(1, 2);
+            res1 = streams.AsStream().Flat();
+            Assert.AreEqual(1, res1.ElementAt(0));
+            Assert.AreEqual(2, res1.ElementAt(1));
+            Assert.AreEqual(3, res1.ElementAt(2));
+            Assert.AreEqual(1, res1.ElementAt(3));
+            Assert.AreEqual(2, res1.ElementAt(4));
+            Assert.AreEqual(5, res1.AsEnumerable().Count());
+        }
+
+        [TestMethod]
+        public void SkipTest()
+        {
+            var res1 = Range(1, 5).Skip(3);
+            var res2 = Range(1, 3).Skip(3);
+            var res3 = Range(1, 2).Skip(3);
+            var res4 = Range(1, 2).Skip(0);
+            Assert.AreEqual(4, res1.ElementAt(0));
+            Assert.AreEqual(5, res1.ElementAt(1));
+            Assert.AreEqual(2, res1.AsEnumerable().Count());
+            Assert.AreEqual(0, res2.AsEnumerable().Count());
+            Assert.AreEqual(0, res3.AsEnumerable().Count());
+            Assert.AreEqual(1, res4.ElementAt(0));
+            Assert.AreEqual(2, res4.ElementAt(1));
+            Assert.AreEqual(2, res4.AsEnumerable().Count());
+        }
+
+        [TestMethod]
+        public void SkipWhlieTest()
+        {
+            var res1 = Range(1, 5).SkipWhile(x => x <= 3);
+            var res2 = Range(1, 3).SkipWhile(x => x <= 3);
+            var res3 = Range(1, 2).SkipWhile(x => x <= 3);
+            Assert.AreEqual(4, res1.ElementAt(0));
+            Assert.AreEqual(5, res1.ElementAt(1));
+            Assert.AreEqual(2, res1.AsEnumerable().Count());
+            Assert.AreEqual(0, res2.AsEnumerable().Count());
+            Assert.AreEqual(0, res3.AsEnumerable().Count());
         }
     }
 }
