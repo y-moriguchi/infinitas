@@ -61,6 +61,16 @@ Select method is overridden using two streams.
 var stream = Integers(1).Select(x => x * x);  // stream of squared integers
 ```
 
+### SelectMany and LINQ query syntax
+SelectMany is a monadic bind function of stream.  
+LINQ query syntax is available by this method.
+
+```csharp
+var stream = from a in Range(1, 3)
+             from b in Range(2, 2)
+             select a + b;         // stream of 3, 4, 4, 5, 5, 6
+```
+
 ### ElementAt
 ElementAt gets the value indexed by the given index.  
 Index is start from 0.
